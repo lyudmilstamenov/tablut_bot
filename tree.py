@@ -1,9 +1,9 @@
-from main import State, Entity
+from utils import State, Entity
 
 
 def possible_moves(state:State):
     possible_states = []
-    
+
     for i in range(len(state.state)):
         for j in range(len(state.state[0])):
             if state.state[i][j] in [Entity.white, Entity.king]:
@@ -11,7 +11,7 @@ def possible_moves(state:State):
                 j_index = j 
                 while True:
                     j_index += 1
-                    if state.state[i][j_index] in [Entity.square, Entity.escape]:
+                    if state.state[i][j_index] in [Entity.square, Entity.escape] and j_index in range(0,9):
                         new_board = state.state
                         new_board[i][j_index] = "W"
                         new_board[i][j] = "O" 

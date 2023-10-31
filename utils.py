@@ -1,6 +1,14 @@
-import os 
 from PIL import Image, ImageDraw
+import math 
 
+
+def score_function(x, x0, x1, steepness=0.5):
+    if x <= x0:
+        return 0
+    elif x >= x1:
+        return 1
+    else:
+        return 1 / (1 + math.exp(-steepness * (x - (x0 + x1) / 2)))
 
 class Entity:
     square = "O"
@@ -33,7 +41,8 @@ class State:
             ]
         else: 
             self.state = state
-    
+        self.score = None
+
     def __str__(self) -> str:
         border = "+---" * len(self.state[0]) + "+"
         string = f"Moved By: {self.last_move} \n"
@@ -80,71 +89,3 @@ class State:
                 draw.rectangle((left, top, right, bottom), outline="black")
 
         board_image.show()  # Show the board using the default image viewer
-
-
-class Record:
-    def __init__(self) -> None:
-        self.states = []
-        self.winner = None
-
-    def add_state(self, state:State):
-        self.states.append(state)
-
-def convert_dataset_txt_to_record(txt_path):
-    with open(txt_path, 'r') as t:
-        string_data = t.read()
-    data_blocks = string_data.split('-\n')
-    
-    record = Record()
-
-    for db in data_blocks[:-1]:
-        new_state = State()
-
-        mvd_by = db.split("\n")[0]
-        if mvd_by == "W":
-            new_state.last_move = LastMoves.white
-        elif mvd_by == "B":
-            new_state.last_move = LastMoves.black
-        else:
-            new_state.last_move = LastMoves.initial_state
-        
-        board_state_str = db.split("Stato:")[1]
-        board_state = [list(a.strip()) for a in board_state_str.split("\n")]
-        for r in board_state: 
-            if not r:
-                board_state.remove(r) 
-        for i, row in enumerate(board_state):
-            for j, sqr in enumerate(row):
-                if sqr == 'W': new_state.state[i][j] = 'W'
-                elif sqr == 'B': new_state.state[i][j] = 'B'
-                elif sqr == 'K': new_state.state[i][j] = 'K'
-
-        record.add_state(new_state)
-    
-    winner_state = data_blocks[-1].strip("\n")
-    if winner_state == "WW":
-        record.winner = Entity.white
-    elif winner_state == "BW":
-        record.winner = Entity.black
-    elif winner_state == "D":
-        record.winner = 'D'
-    else:
-        return
-    
-    record.states[-1].visualize_board()
-    return record
-
-
-if __name__ == "__main__":
-    dataset_path = "Dataset"
-    dataset_files = []
-    for filename in os.listdir(dataset_path): 
-        if filename.endswith("txt"):
-            dataset_files.append(os.path.join(dataset_path, filename))
-
-    records = []
-    for df in dataset_files:
-        data_record = convert_dataset_txt_to_record(df)
-        if data_record:
-            records.append(data_record)
-    ...

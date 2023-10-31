@@ -1,1 +1,3 @@
 Dataset
+*.npy
+__pycache__
