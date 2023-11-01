@@ -107,14 +107,17 @@ class TablutBoard:
             raise Exception("Invalid move")
         opposite_checkers = [PieceEnum.ATTACKER.value] if self.is_player_one_to_move else [PieceEnum.DEFENDER.value,
                                                                                            PieceEnum.KING.value]
+        current_checkers = [PieceEnum.ATTACKER.value] if not self.is_player_one_to_move else [PieceEnum.DEFENDER.value,
+                                                                                              PieceEnum.KING.value]
         checker_neighbours = self.generate_neighbours(end_x, end_y)
 
         # Move the piece
         self.board[end_x][end_y] = self.board[start_x][start_y]
         self.board[start_x][start_y] = 0
 
-        for (x, y) in checker_neighbours[-1:]:
-            if self.board[x][y] != PieceEnum.KING.value and self.is_checker_surrounded((x, y), opposite_checkers):
+        for (x, y) in checker_neighbours:
+            if self.board[x][y] != PieceEnum.KING.value and self.board[x][y] in opposite_checkers \
+                    and self.is_checker_surrounded((x, y), current_checkers):
                 self.board[x][y] = 0
         self.is_player_one_to_move = not self.is_player_one_to_move
         self.old_boards.append(str(self))
@@ -162,9 +165,10 @@ class TablutBoard:
         checker_x, checker_y = checker_location
 
         checker_neighbours = self.generate_neighbours(checker_x, checker_y)
-
         for (x, y) in checker_neighbours:
-            if (x, y) in self.CAMP_LOCATIONS and self.board[2 * x - checker_x][2 * y - checker_y] in opposite_checkers:
+            if (x, y) in self.CAMP_LOCATIONS:
+                # if (x, y) in self.CAMP_LOCATIONS and 0<=2 * x - checker_x <9 and 0 <= 2 * y - checker_y < 9 \
+                #         and self.board[2 * x - checker_x][2 * y - checker_y] in opposite_checkers:
                 return True
         return False
 
@@ -226,8 +230,11 @@ class TablutGame:
             except ValueError:
                 print("Invalid move")
                 continue
-
-            self.board.move_piece(piece_x, piece_y, dest_x, dest_y)
+            try:
+                self.board.move_piece(piece_x, piece_y, dest_x, dest_y)
+            except Exception as e:
+                print(e)
+                continue
             self.current_player = "D" if self.current_player == "A" else "A"
             possible_moves = self.board.get_all_possible_moves()
             winner = self.board.is_game_over(possible_moves)
