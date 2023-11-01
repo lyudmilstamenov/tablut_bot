@@ -28,7 +28,7 @@ class State:
     def __init__(self, state=None, last_move=None) -> None:
         self.last_move = last_move
         if not state:
-            self.state = [
+            self.board = [
             ['O', '*', '*', '0', '0', '0', '*', '*', 'O'],
             ['*', 'O', 'O', 'O', '0', 'O', 'O', 'O', '*'],
             ['*', 'O', 'O', 'O', 'O', 'O', 'O', 'O', '*'],
@@ -40,14 +40,14 @@ class State:
             ['O', '*', '*', '0', '0', '0', '*', '*', 'O']
             ]
         else: 
-            self.state = state
+            self.board = state
         self.score = None
 
     def __str__(self) -> str:
-        border = "+---" * len(self.state[0]) + "+"
+        border = "+---" * len(self.board[0]) + "+"
         string = f"Moved By: {self.last_move} \n"
         string += border + "\n"
-        for row in self.state:
+        for row in self.board:
             string += "| " + " | ".join(row) + " |" + "\n"
             string += border  + "\n"
         return string
@@ -59,13 +59,13 @@ class State:
         empty_cell_color = (255,233,127)
         
         square_size = 40  # Adjust the size of each square as needed
-        board_width = len(self.state[0]) * square_size
-        board_height = len(self.state) * square_size
+        board_width = len(self.board[0]) * square_size
+        board_height = len(self.board) * square_size
 
         board_image = Image.new("RGB", (board_width, board_height), "white")
         draw = ImageDraw.Draw(board_image)
 
-        for row_idx, row in enumerate(self.state):
+        for row_idx, row in enumerate(self.board):
             for col_idx, cell in enumerate(row):
                 left = col_idx * square_size
                 top = row_idx * square_size

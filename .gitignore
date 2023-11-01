@@ -1,3 +1,4 @@
 Dataset
 *.npy
 __pycache__
+model

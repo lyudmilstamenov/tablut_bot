@@ -1,39 +1,54 @@
-from utils import State, Entity
-
-
-def possible_moves(state:State):
-    possible_states = []
-
-    for i in range(len(state.state)):
-        for j in range(len(state.state[0])):
-            if state.state[i][j] in [Entity.white, Entity.king]:
-                ## horizontal
-                j_index = j 
-                while True:
-                    j_index += 1
-                    if state.state[i][j_index] in [Entity.square, Entity.escape] and j_index in range(0,9):
-                        new_board = state.state
-                        new_board[i][j_index] = "W"
-                        new_board[i][j] = "O" 
-                        new_state = State(last_move="W", state=new_board)
-                        possible_states.append(new_state)
-                ...
-
-
+from Utils import State, Entity
+from copy import deepcopy
 
 class Node:
-    def __init__(self, parent, state:State, children:list) -> None:
+    def __init__(self, parent, state:State, children:list, name = "H") -> None:
         self.parent = parent
         self.state = state 
         self.children = children
         self.score = 0
 
+    def possible_moves(self, black_or_white="W"):
+        possible_states = []
+        node = self.state
+        for i in range(len(node.board)):
+            for j in range(len(node.board[0])):
+                if node.board[i][j] in [Entity.white, Entity.king]:
+                    ## possible move  
+                    possible_directions = [(0, 1), (0, -1), (1, 0), (-1, 0)] 
+                    for rl, ud in possible_directions:
+                        counter = 0
+                        while True:
+                            counter += 1
+                            new_i = i + counter*rl  
+                            new_j = j + counter*ud
+                            if inside_board(node, new_i, new_j) and node.board[new_i][new_j] in [Entity.square, Entity.escape]:
+                                possible_states.append((i, j, new_i, new_j))
+                            else: break
+        return possible_states
+    
+    def expand_node(self, moves:list):
+        for move in moves:
+            i, j, new_i, new_j = move
+            new_state = deepcopy(self.state.board)
+            new_state[new_i][new_j] = new_state[i][j]
+            new_state[i][j] = State().board[i][j] 
+            new_node = Node(parent=self, state=new_state, children=[])
+            self.children.append(new_node)
+
 class Tree:
     def __init__(self, root:Node) -> None:
         self.root = root 
-    
-    def explore_node(self, node:Node):
-        pass
+        moves = self.root.possible_moves()
+        self.root.expand_node(moves)
+
+    def highest_score_child(): pass 
+    def black_random_select(): pass 
+
+
+def inside_board(state, i, j):
+    board_size = len(state.board)
+    return 0 <= i < board_size and 0 <= j < board_size
 
 
 initial_state = [
@@ -49,7 +64,6 @@ initial_state = [
     ]
 
 state_0 = State(initial_state, "I")
-
 game_tree = Tree( Node(None, state_0, []) )
 
-possible_moves(state_0)
+...
